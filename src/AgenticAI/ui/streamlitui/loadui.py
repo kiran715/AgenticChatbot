@@ -13,6 +13,8 @@ class LoadStreamlitUI:
         st.set_page_config(page_title = self.config.get_page_title(), layout='wide')
         st.header(self.config.get_page_title())
 
+        st.session_state['timeframe'] = ''
+        st.session_state['IsButtonClicked'] = False
         with st.sidebar:
             llm_options = self.config.get_llm_options()
             usecase_options = self.config.get_usecase_options()
@@ -28,4 +30,20 @@ class LoadStreamlitUI:
                     st.warning('Please enter GROQ API key to proceed')
 
             self.user_controls['selected_usecase'] = st.selectbox('Select Usecase', usecase_options)
+            if self.user_controls['selected_usecase'].upper() == 'CHATBOT WITH WEBSEARCH' or self.user_controls['selected_usecase'].upper() == 'AI NEWS':
+                os.environ["TAVILY_API_KEY"] = self.user_controls['TAVILY_API_KEY'] = st.session_state['TAVILY_API_KEY'] = st.text_input('Tavily api key', type='password')
+
+                if not self.user_controls["TAVILY_API_KEY"]:
+                    st.warning("Please enter your Tavily API key to proceed")
+
+            if self.user_controls['selected_usecase'].upper() == 'AI NEWS':
+                st.subheader("AI NEWS Explorer")
+
+                with st.sidebar:
+                    time_frame = st.selectbox("Select Time Frame", ['Daily', 'Weekly', 'Monthly'], index=0)
+
+                if st.button("Fetch Latest AI News", use_container_width=True):
+                    st.session_state['IsButtonClicked'] = True
+                    st.session_state['timeframe'] = time_frame
+                    
         return self.user_controls
